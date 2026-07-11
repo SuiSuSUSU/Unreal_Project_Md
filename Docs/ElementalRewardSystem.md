@@ -214,7 +214,7 @@ Current implementation status:
 - Chain Lightning MVP is implemented as gameplay feedback with temporary VFX. When the player is in Lightning state and a melee attack actually applies damage, `PlayerMeleeAttackSubsystem` can chain small Lightning damage through up to 2 nearby additional active enemies.
 - Current Chain Lightning MVP excludes enemies directly hit by the original melee cone, queues at most one chain sequence per attack, delays each transfer by 0.03-0.06 seconds, and can transfer through up to 2 nearby additional active enemies.
 - Each transfer spawns a temporary `/Game/EnergyBeam/NS/NS_ChainLightning_Controlled` world Beam after chain damage is applied, plus a short attached target electric hit VFX on the chained target.
-- `EnemyBase` now supports Electric Stack and Shock state. Direct Lightning hits add 2 stacks, Chain Lightning hits add 1 stack, 3 stacks trigger a 2 second Shock state, and stacks expire after 4 seconds without more electric hits.
+- `EnemyBase` now supports Electric Stack and Shock state. Direct Lightning hits add 2 stacks, Chain Lightning hits add 1 stack, 5 stacks trigger a 2 second Shock state, and stacks expire after 4 seconds without more electric hits.
 - Shock currently has no extra damage, slow, explosion, propagation, or final Niagara VFX.
 - A first temporary Stage Clear Lightning reward card, `run_lightning_current_slash`, is implemented. It enables Lightning state for the current Run and lets the existing Chain Lightning MVP run from confirmed melee hits.
 - Prism unlock logic is not implemented yet.

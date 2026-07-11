@@ -44,7 +44,8 @@ Player overlaps RoomCombatActor TriggerBox
 -> local doors/boundaries lock the Room
 -> encounter setup builds spawn queues and placed enemy tracking
 -> initial enemies spawn or placed enemies activate
--> wave/sequential enemies spawn as configured
+-> the first queued wave enemy is scheduled from Room combat start
+-> the wave enemy joins after SpawnDelay even if initial enemies are still alive
 -> AliveEnemies are tracked through HealthComponent death events
 -> all tracked enemies die
 -> RoomCombatActor marks Room Cleared
@@ -103,6 +104,7 @@ Current responsibilities:
 - Own one active `StageId`.
 - Auto-find or use registered Rooms for that Stage.
 - Sort Rooms by `RoomOrder`.
+- For the current Start Stage stabilization pass, limit the active Stage to 3 ordered Rooms.
 - Disable Room Clear reward cards for manager-owned Rooms.
 - Listen to `RoomCombatActor.OnRoomProgressionReady`.
 - Activate the next Room in order.
@@ -129,7 +131,7 @@ Current fields:
 |---|---|
 | `InitialSpawnEntries` | Enemies spawned together when combat starts. |
 | `WaveSpawnEntries` | Enemies spawned sequentially or in later groups. |
-| `SpawnDelay` | Delay between wave entries. |
+| `SpawnDelay` | Delay from Room combat start before the first queued Wave enemy joins; later sequential behavior remains the existing queue behavior. |
 | `PlacedEnemyActivationPolicy` | Whether placed enemies activate on Room start or by detection. |
 | `PlacedEnemyActivationRadius` | Detection radius for dormant placed enemies. |
 | `ClearCondition` | Which tracked enemies count for Room Clear. |
@@ -210,6 +212,16 @@ For a manager-owned Stage test:
 10. Check Output Log if progression fails.
 
 Expected progression logs should show the manager receiving room progression and activating the next Room.
+
+Start Stage `CANDIDATE v0.1` profile:
+
+| Room | Candidate role | Encounter DataAsset |
+|---|---|---|
+| Room 0 | Basic combat | `DA_Start_Room01_BasicMelee` |
+| Room 1 | Fast pressure | `DA_Start_Room02_FastPriority` |
+| Room 2 | Tank mix / Stage finish | `DA_Start_Room03_TankMixed` |
+
+Room 2 is the candidate final required Room for this Start Stage stabilization pass. Stage Clear reward should appear only after Room 2 is cleared. Exact entries and delays are in `Docs/StartStageV01.md`; the profile remains a candidate until editor setup and PIE verification are complete.
 
 ## 12. Fallback and Deprecated Direction
 

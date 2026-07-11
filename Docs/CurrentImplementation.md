@@ -1,7 +1,7 @@
 ---
 Status: ACTIVE
 Scope: Current Implementation
-Last Updated: 2026-07-06
+Last Updated: 2026-07-11
 Source of Truth: Yes
 ---
 
@@ -32,6 +32,18 @@ Older TopDown template assets and sample classes can still exist in the project,
 ## 3. Current Playable Loop
 
 The current playable loop is a single-map Stage/Room MVP.
+
+Current 3-month stabilization target:
+
+- `StageFlowManager` supports limiting the Start Stage to 3 active Rooms.
+- The authored 3-Room Encounter setup remains `CANDIDATE v0.1`: its code, DataAssets, and Room links are created and commandlet-validated, while PIE timing and repeated-run verification are still pending.
+- Rooms after the active Start Stage count can remain placed in the map, but `StageFlowManager` can disable them for the current test profile.
+- The authored enemy composition and editor values are documented in `Docs/StartStageV01.md`, but they must not be treated as runtime-verified until the pending PIE checklist passes.
+
+| Scope | Code status | Asset / editor status | PIE status |
+|---|---|---|---|
+| Start Stage v0.1 | Built and statically reviewed | Three Encounter DataAssets created; Room 0~2 and `StageFlowManager` links commandlet-validated | Pending SpawnPoint, timing, reward, and 5-run softlock checks |
+| Ranged enemy dummy | Built and statically reviewed | SkeletonMage Mesh, `ThirdPerson_AnimBP`, hand-held staff, and temporary Sphere projectile are linked; one independent test actor remains 1000cm from PlayerStart | PIE verified for approach, stop/facing, straight projectile, and 10 player damage. Dormant/Shock and final presentation checks remain. |
 
 ```text
 Player enters an enabled Room
@@ -66,7 +78,7 @@ Long-term Run and Stage Map flow is documented in `Docs/StageRunStructure.md`. T
 | Hit distortion / Lightning hit VFX | `PlayerMeleeAttackSubsystem` | Neutral uses hit distortion; Lightning state uses `NS_Hit_Lightning_once` on confirmed hit. |
 | Sword trail | `WeaponTrailComponent`, `AnimNotifyState_WeaponTrail` | Implemented as component/notify path; editor tuning still matters. |
 | Lightning debug state | `PlayerStatsComponent`, `PlayerKeyboardMovementSubsystem` | L toggles `Neutral` / `Lightning`; log-only debug. |
-| Chain Lightning MVP | `PlayerMeleeAttackSubsystem` | Implemented: Lightning state, confirmed hit, one nearby extra target, and temporary chain VFX. |
+| Chain Lightning MVP | `PlayerMeleeAttackSubsystem` | Implemented: Lightning state, confirmed hit, up to 2 nearby transfer targets, 650 radius, 35% base attack damage, minimum 1 damage, and temporary chain VFX. |
 | Health orb HUD | `PlayerHealthSubsystem`, `PlayerHealthOrbWidget` | Implemented. |
 | Player death | `PlayerHealthSubsystem` | Implemented. |
 | Player hit reaction | `PlayerHealthSubsystem`, enemy attack request | Light/Heavy MVP implemented. |
@@ -88,6 +100,7 @@ Current player combat is still built around the existing katana combo. Final ski
 | Ordered Room progression | `StageFlowManager` | Implemented for one active Stage id. |
 | Stage Clear reward timing | `StageFlowManager` | Implemented as current MVP fallback. |
 | Temporary restart after Stage Clear | `StageFlowManager` | Implemented until Stage Map exists. |
+| Start Stage 3-Room limit | `StageFlowManager` | Code and authored DataAsset/map setup are created and statically validated. `CANDIDATE v0.1` remains pending PIE verification. |
 
 Manager-owned Rooms should not grant build reward cards on every Room Clear. `StageFlowManager` disables Room Clear rewards for registered Rooms and opens the existing reward flow at Stage Clear.
 
@@ -100,13 +113,15 @@ Standalone Room Clear rewards remain only as an MVP test path for rooms not owne
 | Per-Room encounter data | `RoomEncounterDataAsset` | Implemented as first data asset path. |
 | Initial spawn entries | `RoomEncounterDataAsset.InitialSpawnEntries` | Implemented. |
 | Wave spawn entries | `RoomEncounterDataAsset.WaveSpawnEntries` | Implemented. |
-| Spawn delay | `RoomEncounterDataAsset.SpawnDelay` or `RoomCombatActor` fallback | Implemented. |
+| Spawn delay | `RoomEncounterDataAsset.SpawnDelay` or `RoomCombatActor` fallback | Implemented: the first queued Wave enemy is scheduled from Room combat start and can join while Initial enemies are alive. |
 | Spawn points | `RoomCombatActor.SpawnPoints` | Implemented. |
 | Placed enemies | `RoomCombatActor.PlacedEnemyActors` | Implemented. |
 | Clear condition enum | `RoomEncounterDataAsset.ClearCondition` | Prepared / first implementation. |
 | Global test spawn | `EnemySpawnSubsystem` | Exists but should remain disabled by default. |
 
 `EnemySpawnSubsystem` is not the main game spawn loop. It is a global test/temporary validation path.
+
+The old temporary runtime 3-Room encounter override remains as a fallback field but is disabled by default. The `CANDIDATE v0.1` setup uses three authored `RoomEncounterDataAsset` assets that are created, linked, and commandlet-validated. Do not mark the gameplay flow runtime-verified until the PIE checklist passes.
 
 ## 7. Reward Implementation
 
@@ -119,6 +134,7 @@ Standalone Room Clear rewards remain only as an MVP test path for rooms not owne
 | Apply type enum | `ERewardApplyType` | Instant / Run / Permanent implemented as type split. |
 | Runtime Run stat modifiers | `PlayerStatsComponent` | Implemented for temporary Run rewards. |
 | Run reward reset | `PlayerHealthSubsystem`, `PlayerStatsComponent` | Implemented on death/restart path. |
+| Fixed Stage reward option ids | `StageFlowManager`, `RewardActor` | Code support prepared for 3 fixed cards; editor/PIE verification pending. |
 | Permanent upgrade persistence | None | Not implemented. |
 
 Long-term reward definitions, rarity, weighted pools, Luck, enemy drop items, and permanent upgrade save/load are not implemented.
@@ -137,6 +153,7 @@ Long-term reward definitions, rarity, weighted pools, Luck, enemy drop items, an
 | Little Demon | `BP_Enemy_LittleDemon` | Implemented MVP enemy. |
 | Tank / Butcher | `BP_Enemy_Tank`, `ABP_Butcher` | Implemented MVP enemy. |
 | Fast / DemonHeavy | `BP_Enemy_Fast`, dedicated AnimBP path | Implemented MVP enemy. |
+| Ranged enemy dummy gameplay | `EnemyRangedDummy`, `EnemyStraightProjectile`, `BP_Enemy_RangedDummy` | SkeletonMage presentation is connected without hardcoded asset paths in C++. PIE verified approach to about 650cm, stop/facing, straight projectile fire, and player `HealthComponent` damage. It remains outside Start Stage encounters. |
 | Universal enemy hit react | Future system | Not implemented. |
 
 The removed shared white hit-flash should not be reintroduced as the enemy feedback path.

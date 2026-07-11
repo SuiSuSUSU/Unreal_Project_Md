@@ -71,6 +71,8 @@ Important distinction:
 
 Current reward data is still temporary. It is not the final reward database.
 
+For Start Stage `CANDIDATE v0.1`, code support exists to request three fixed Stage Clear options by reward id: `run_attack_damage_5`, `run_lightning_current_slash`, and `run_dodge_cooldown_015`. This candidate setup is not considered verified until the Stage reward actor is checked in PIE.
+
 ## 5. Current Temporary Rewards
 
 | Current Reward Id | Apply Type | Long-Term Home | Status |

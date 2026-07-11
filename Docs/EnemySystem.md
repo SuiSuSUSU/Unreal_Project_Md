@@ -1,7 +1,7 @@
 ---
 Status: ACTIVE
 Scope: Enemy Design
-Last Updated: 2026-07-06
+Last Updated: 2026-07-11
 Source of Truth: Yes
 ---
 
@@ -27,6 +27,8 @@ EnemySystem은 적의 공통 행동, 현재 구현된 적 타입, 체력/공격/
 | 구분 | 파일 | 역할 |
 | --- | --- | --- |
 | 적 공통 기반 | `Source/MyProject/Enemies/EnemyBase.h/.cpp` | 체력, 추격, 근접 공격, 활성화 상태, 분리 이동, 스폰 인트로, 사망 처리 |
+| 원거리 적 더미 | `Source/MyProject/Enemies/EnemyRangedDummy.h/.cpp` | 사거리 접근, 정지/조준, 예고, 단발 직선 투사체 발사 |
+| 적 직선 투사체 | `Source/MyProject/Enemies/EnemyStraightProjectile.h/.cpp` | 비유도 이동, 충돌, 플레이어 `HealthComponent` 피해, 교체 가능한 연출 컴포넌트 |
 | 적 스탯 데이터 | `Source/MyProject/Enemies/EnemyStatsDataAsset.h/.cpp` | 적 ID, 이름, 체력, 이동, 분리, 공격 수치 |
 | 적 AnimBP 변수 | `Source/MyProject/Enemies/EnemyAnimInstance.h/.cpp` | GroundSpeed, 이동 상태, 공격 상태, 사망 상태 |
 | 전역 테스트 스폰 | `Source/MyProject/Enemies/EnemySpawnSubsystem.h/.cpp` | 비활성 기본값의 전역 테스트 스폰 경로 |
@@ -41,6 +43,8 @@ EnemySystem은 적의 공통 행동, 현재 구현된 적 타입, 체력/공격/
 | `BP_Enemy_LittleDemon` | 구현된 MVP 적 | Little Demon 기반 소형 근접 적 |
 | `BP_Enemy_Fast` | 구현된 MVP 적 | DemonHeavy 외형을 사용하는 빠른 압박형 적 |
 | `BP_Enemy_Tank` | 구현된 MVP 적 | Butcher 외형을 사용하는 느린 고체력 적 |
+
+`AEnemyRangedDummy`와 `AEnemyStraightProjectile`의 C++ gameplay 골격은 빌드 검증되었다. `/Game/Blueprints/Enemy/Ranged/BP_Enemy_RangedDummy`는 SkeletonMage Mesh, `ThirdPerson_AnimBP`, `hand_r`에 연결된 지팡이를 사용하고 `BP_Enemy_StraightProjectile`과 연결되어 있다. `TEST_Enemy_RangedDummy`는 PlayerStart에서 1000cm 떨어진 위치에 독립 배치되어 있다. PIE에서 약 650cm까지 접근, 정지/플레이어 방향 조준, 직선 투사체 발사, 플레이어 `HealthComponent`에 10 피해 적용을 확인했다. 전용 캐스팅 애니메이션, 예고 VFX, 최종 발사점, 투사체 Niagara/Sound, Dormant/Shock 시각 검증은 아직 남아 있다. Start Stage와 `RoomEncounterDataAsset`에는 추가하지 않는다.
 
 현재 기준:
 
@@ -59,6 +63,7 @@ EnemySystem은 적의 공통 행동, 현재 구현된 적 타입, 체력/공격/
 - `HealthComponent` 보유와 사망 이벤트 연결
 - `EnemyStatsDataAsset` 값 적용
 - 플레이어 탐색과 추격
+- 하위 적 행동을 위한 `UpdateCombatBehavior()` 확장점. 기본 구현은 기존 추격/근접 공격을 그대로 사용
 - 플레이어와의 목표 거리 유지
 - 근접 공격 거리/쿨타임 판정
 - 약공격/강공격 애니메이션 재생 요청
@@ -78,7 +83,7 @@ EnemySystem은 적의 공통 행동, 현재 구현된 적 타입, 체력/공격/
 - 특정 적의 메시/스켈레톤/AnimBP 하드코딩
 - 적별 VFX, 피격 이펙트, 보스 전용 연출
 - 복잡한 HitReact/경직/넉백 정책
-- 원거리 투사체, 장판, 소환 같은 특수 패턴 전체 구조
+- 원거리 투사체, 장판, 소환 같은 특수 패턴의 적별 구현
 
 ## 6. 활성화 상태 기준
 
@@ -129,6 +134,15 @@ EnemySystem은 적의 공통 행동, 현재 구현된 적 타입, 체력/공격/
 - 일반 공격은 Light, 강공격은 Heavy 피격 반응을 요청한다.
 - 적 공격 타이밍은 아직 공격 애니메이션 Notify 기반이 아니라 거리/쿨타임 로직 기반이다.
 - 공격 애니메이션은 presentation이며, 데미지 판정 자체를 결정하지 않는다.
+
+원거리 더미 예외 기준:
+
+- `EnemyRangedDummy`는 `EnemyBase`의 체력/활성화/피격/사망 상태를 재사용하고 행동 함수만 재정의한다.
+- 사거리 밖에서는 접근하고, 사거리 안에서는 정지해 플레이어를 바라본 뒤 짧게 예고하고 직선 비유도 투사체 한 발을 발사한다.
+- 투사체는 플레이어 충돌 시 기존 `HealthComponent`에 피해를 적용한다.
+- 후퇴, 좌우 이동, 유도, 다중 발사, 상태이상은 현재 범위가 아니다.
+- 공격 예고와 발사 시점에는 Blueprint presentation 이벤트를 제공하며, 특정 외형/VFX/Sound 경로는 C++에 넣지 않는다.
+- 공격 예고 중 Dormant 또는 Shock 상태가 시작되면 예고를 완전히 취소하며, 상태 해제 후 사거리 안에서 전체 예고 시간을 처음부터 다시 진행한다.
 
 약공격/강공격 기준:
 
@@ -195,7 +209,7 @@ EnemySystem은 적의 공통 행동, 현재 구현된 적 타입, 체력/공격/
 
 - Lightning 직접 타격을 받은 적은 `ElectricStack +2`를 받는다.
 - Chain Lightning 전이 피해를 받은 적은 `ElectricStack +1`을 받는다.
-- `ElectricStack`이 3 이상이 되면 Shock 상태가 발동한다.
+- `ElectricStack`이 5 이상이 되면 Shock 상태가 발동한다.
 - Shock 지속 시간은 2초다.
 - Shock 발동 시 `ElectricStack`은 0으로 초기화한다.
 - Shock 상태 중에는 추가 Electric Stack을 받지 않는다.

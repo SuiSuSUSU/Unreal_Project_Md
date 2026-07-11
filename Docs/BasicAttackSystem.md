@@ -175,7 +175,7 @@ Run 보상으로 `BasicAttackDamage` 계열 값이 바뀔 수 있지만, 원본 
 | --- | --- | --- |
 | 피 VFX | 구현됨 | 적용 데미지 0 초과 시 무작위 Blood Niagara 재생 |
 | Hit Distortion VFX | 구현됨 | 적용 데미지 0 초과 시 `NS_Hit_Distortion` 재생 |
-| Chain Lightning MVP | 구현됨 | Lightning 상태, 확정 히트, 주변 추가 대상 1명, 임시 chain VFX |
+| Chain Lightning MVP | 구현됨 | Lightning 상태, 확정 히트, 최대 2번 전이, 임시 chain VFX |
 | Sword Trail | 구현됨 | `WeaponTrailComponent`와 `AnimNotifyState_WeaponTrail` 기준 |
 | Ground Spark | 구현됨 | `AnimNotify_GroundImpactVfx` 기준 |
 
@@ -203,7 +203,7 @@ Run 보상으로 `BasicAttackDamage` 계열 값이 바뀔 수 있지만, 원본 
 - 체인 데미지는 기본 공격 데미지의 35%이며 최소 1이다.
 - Lightning 직접 타격은 대상 적에게 `ElectricStack +2`를 부여한다.
 - Chain Lightning 전이 피해는 대상 적에게 `ElectricStack +1`을 부여한다.
-- `ElectricStack`이 3 이상이면 `EnemyBase`의 Shock 상태가 발동한다.
+- `ElectricStack`이 5 이상이면 `EnemyBase`의 Shock 상태가 발동한다.
 - Chain Lightning Beam은 월드 독립 VFX로 생성되고, 전이 대상 피격 전기 VFX는 대상 Mesh 또는 Root에 짧게 attached된다.
 - Chain Lightning 초록 디버그 선은 `bShowChainLightningDebug`가 켜져 있을 때만 표시한다.
 - 최종 Chain Lightning VFX 튜닝은 아직 완료하지 않았고, 현재는 임시 Beam/target hit VFX를 사용한다.

@@ -49,7 +49,7 @@ Source of Truth: Yes
 | 지면 스파크 | 구현됨 | `AnimNotify_GroundImpactVfx` |
 | 피격 피/Hit Distortion | 구현됨 | 현재는 `PlayerMeleeAttackSubsystem` 안의 임시 연결 |
 | Lightning 런 상태 | 구현됨 | L 디버그 토글 또는 `run_lightning_current_slash` 보상, `PlayerStatsComponent` |
-| Chain Lightning MVP | 구현됨 | Lightning 상태 + 확정 히트 + 주변 추가 대상 1명 |
+| Chain Lightning MVP | 구현됨 | Lightning 상태 + 확정 히트 + 최대 2번 전이 |
 | Stage Clear 보상 타이밍 | 구현됨 | `StageFlowManager` MVP fallback |
 | 정식 스킬 슬롯/스킬 UI | 미구현 | 후보 |
 | RewardDataAsset | 미구현 | 후보 |
@@ -150,7 +150,7 @@ Source of Truth: Yes
 
 - L로 `Neutral` / `Lightning` 상태를 디버그 전환할 수 있다.
 - Lightning 상태에서 플레이어 기본 공격이 실제 적중하면 Chain Lightning MVP가 실행된다.
-- 현재 Chain Lightning은 원래 맞은 적을 제외하고 주변 추가 대상 1명에게 약한 번개 데미지를 준다.
+- 현재 Chain Lightning은 원래 맞은 적을 제외하고 주변 활성 적에게 최대 2번 전이하며 약한 번개 데미지를 준다.
 - 현재 Chain Lightning VFX arc는 임시 MVP로 구현되어 있으며, 최종 튜닝은 아직 남아 있다.
 
 현재 기준:

@@ -1,7 +1,7 @@
 ---
 Status: ACTIVE
 Scope: Enemy Animation
-Last Updated: 2026-07-06
+Last Updated: 2026-07-11
 Source of Truth: Yes
 ---
 
@@ -34,6 +34,7 @@ Source of Truth: Yes
 | Little Demon | 안정성을 우선해 SingleNode / `EnemySimpleAnimationComponent` 경로 유지 |
 | Fast / DemonHeavy | DemonHeavy 원본 스켈레톤과 dedicated AnimBP/Montage 경로 사용 |
 | Tank / Butcher | Butcher 스켈레톤과 dedicated AnimBP/Montage 경로 사용 |
+| Ranged Dummy / SkeletonMage | SkeletonMage 원본 Mesh와 `ThirdPerson_AnimBP` locomotion 사용. 전용 cast animation은 아직 없음 |
 
 ## 3. 현재 구현 상태
 
@@ -108,6 +109,21 @@ Source of Truth: Yes
 - Tank 공격 전환이 어색하면 `ABP_Butcher`, Montage BlendIn/BlendOut, 공격 lock duration, post-attack turn 값을 먼저 확인한다.
 - 여러 Butcher 공격을 추가할 때는 무작위 재생보다 약공격/강공격 또는 Montage section 기반으로 검증한다.
 
+### Ranged Dummy / SkeletonMage
+
+현재 원거리 테스트 적은 SkeletonMage 에셋을 presentation으로 사용한다.
+
+| 항목 | 현재 기준 |
+|---|---|
+| Blueprint | `/Game/Blueprints/Enemy/Ranged/BP_Enemy_RangedDummy` |
+| 메시 | `/Game/SkeletonMage/Mesh/SK_SkeletonMage` |
+| AnimBP | `/Game/SkeletonMage/Animations/ThirdPerson_AnimBP` |
+| 지팡이 | `/Game/SkeletonMage/Mesh/SK_MagicStaff`, `hand_r` 연결 |
+| 현재 애니메이션 범위 | idle / locomotion |
+| 공격 presentation | 전용 캐스팅 애니메이션과 예고 VFX는 아직 미구현 |
+
+PIE에서 메시 방향과 지면 정렬, 사거리 접근 후 정지/조준, 투사체 발사를 확인했다. 원거리 gameplay 수치는 `EnemyRangedDummy`가 담당하고 SkeletonMage 에셋 경로는 Blueprint에만 둔다.
+
 ### 공통 적 애니메이션 클래스
 
 | 클래스 / 컴포넌트 | 역할 |
@@ -124,7 +140,7 @@ Source of Truth: Yes
 - 적별 피격 반응 AnimBP/Montage 연결.
 - 적별 사망 애니메이션 최종 품질 정리.
 - MiniBoss/Boss 전용 애니메이션 구조.
-- 원거리 적, 장판 적, 특수 적 전용 애니메이션 구조.
+- 원거리 적의 전용 캐스팅/예고 애니메이션 구조와 장판 적, 특수 적 전용 애니메이션 구조.
 - 여러 몬스터 체형을 위한 공통 리타겟 파이프라인.
 
 ## 5. 수정 시 주의사항

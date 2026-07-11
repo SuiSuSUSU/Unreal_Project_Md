@@ -20,6 +20,8 @@ Source of Truth: Yes
 | 2026-07-01 | 다음 Room으로 가는 길은 현재 Room의 모든 몬스터를 처치하면 열린다. 보상 카드는 Room Clear가 아니라 Stage Clear 시점에 지급한다. | Room Clear의 의미와 Stage Clear 보상 타이밍을 분리해야 진행과 성장 구조가 섞이지 않기 때문이다. | Room마다 보상 카드 선택 후 다음 Room 열림 | 기존 Room Clear 보상 카드는 MVP 테스트 파이프라인으로만 유지하고, `StageFlowManager` 진행 이관 시 끄거나 Stage Clear 보상으로 옮김 |
 | 2026-07-01 | `NextRoomActors`와 `bAutoFindNextRoomByOrder`는 아직 deprecated하지 않는다. | `StageFlowManager` 신호 브리지가 에디터 Output Log에서 확인되기 전까지 진행권을 옮기면 방 진행이 멈출 위험이 있기 때문이다. | 즉시 `StageFlowManager` 중심으로 전환 | manager가 다음 Room 활성화와 마지막 Room Stage Clear fallback을 검증한 뒤 fallback/테스트용으로 낮춤 |
 | 2026-07-01 | `StageFlowManager` 다음 구현은 후보 계산, 기존 handoff 비교, 실제 활성화, Stage Clear fallback 이관 순서로 나눈다. | 바로 다음 방 활성화를 옮기면 신호/후보 계산 오류가 플레이 흐름 중단으로 이어질 수 있기 때문이다. | 후보 검증 없이 바로 다음 Room 활성화 이관 | Step A/B 로그 검증 후 Step C, Step C 검증 후 Step D 진행 |
+| 2026-07-10 | 3개월 목표의 첫 구현 단위는 3 Room Start Stage 안정화로 둔다. | 새 시스템을 많이 늘리기보다 12~18분 완결 Run의 기초가 되는 전투 -> Stage Clear 보상 흐름을 먼저 안정화하기 위함이다. | 기존 7 Room 테스트 구성을 그대로 3개월 기준으로 사용 | 3 Room Start Stage를 5회 반복 테스트한 뒤 Stage Map 작업으로 이동 |
+| 2026-07-10 | 현재 Start Stage 테스트 Encounter는 Room 0 Little Demon 중심, Room 1 Fast 중심, Room 2 Tank+Little Demon 조합으로 둔다. | Little Demon 기본 전투, Fast 회피 압박, Tank 마무리 전투를 짧게 검증하기 위함이다. | 적 조합 확정 전에 Stage Map부터 구현 | 안정화 후 유지할 Encounter는 `RoomEncounterDataAsset`으로 이전 |
 
 이 문서는 앞으로 확정된 내용을 기록한다. 결정된 방향과 아직 미정인 항목을 분리해서 관리한다.
 
@@ -46,7 +48,7 @@ Source of Truth: Yes
 - 스테이지 방향: 작은 방/구역을 하나씩 클리어하는 방 클리어형 진행.
 - 적 구조: `EnemyBase`, `EnemyStatsDataAsset`, Little Demon 적 구조 유지.
 - 스폰 방향: 전역 무한 스폰보다 방 입장 시 SpawnPoint 기준 정해진 적 생성으로 전환.
-- Stage 구조: 하나의 Stage는 여러 Room의 묶음이며, Stage 1은 7개 Room 진행을 목표 구조로 검토한다.
+- Stage 구조: 하나의 Stage는 여러 Room의 묶음이며, 7개 Room은 과거 테스트 baseline일 뿐 확정값이 아니다. 현재 3개월 첫 단계는 3 Room Start Stage 안정화로 둔다.
 - Stage 1 방향: 짧은 전투방을 연속으로 클리어하고, 마지막 방 또는 별도 보스방에서 첫 보스를 처치하는 구조를 우선한다.
 - 보상 방향: Stage Clear 시점에 후보 카드가 바뀌며, 등급형 보상 카드로 보상 강도를 나누는 구조를 채택한다. Bronze/Silver/Gold/Prism은 현재 후보 명칭이다.
 - 성장 방향: 첫 스테이지부터 3타 강화, 회피 후 공격 강화, 처치 회복, 출혈, 잔상 폭발처럼 전투 방식이 체감되게 바뀌는 보상을 우선한다.

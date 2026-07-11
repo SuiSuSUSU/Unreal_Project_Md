@@ -1,7 +1,7 @@
 ---
 Status: ACTIVE
 Scope: Class Map
-Last Updated: 2026-07-06
+Last Updated: 2026-07-11
 Source of Truth: Yes
 ---
 
@@ -95,6 +95,8 @@ Current `Permanent` rewards are structural placeholders only. No save/load, curr
 | Class / Asset | Status | Responsibility |
 |---|---|---|
 | `AEnemyBase` | Implemented | Common enemy movement, chase, melee attack, activation state, separation, spawn intro, death. |
+| `AEnemyRangedDummy` | C++ build verified / SkeletonMage BP presentation / core PIE verified | Reuses `EnemyBase` lifecycle; approaches to range, stops and faces the player, telegraphs, and fires one straight projectile. |
+| `AEnemyStraightProjectile` | C++ build verified / temporary Sphere presentation / core PIE verified | Non-homing projectile movement, collision, player `HealthComponent` damage, Blueprint-owned presentation. |
 | `UEnemyStatsDataAsset` | Implemented | Enemy health, speed, attack, range, separation values. |
 | `UEnemySimpleAnimationComponent` | Implemented | Simple fallback idle/move playback. |
 | `UEnemyAnimInstance` | Implemented | AnimBP variables such as movement/death state. |
@@ -104,6 +106,8 @@ Current `Permanent` rewards are structural placeholders only. No save/load, curr
 | `BP_Enemy_LittleDemon` | Implemented MVP | Little Demon enemy. |
 | `BP_Enemy_Tank` | Implemented MVP | Butcher/Tank enemy using dedicated AnimBP/Montage path. |
 | `BP_Enemy_Fast` | Implemented MVP | DemonHeavy/Fast enemy using dedicated AnimBP/Montage path. |
+
+The ranged dummy is not registered in the Start Stage or any current `RoomEncounterDataAsset`. `TEST_Enemy_RangedDummy` is an independent map test actor near PlayerStart. `BP_Enemy_RangedDummy` uses `/Game/SkeletonMage/Mesh/SK_SkeletonMage`, `/Game/SkeletonMage/Animations/ThirdPerson_AnimBP`, and a staff attached to `hand_r`; the projectile still uses a temporary Engine Sphere presentation. Dedicated cast animation, telegraph VFX, final muzzle tuning, projectile Niagara, sound, and Dormant/Shock PIE checks remain future presentation work.
 
 Do not hardcode monster mesh, skeleton, or animation assets in `EnemyBase` for new enemy types. Configure those through Blueprint/assets unless a code-level abstraction is explicitly needed.
 

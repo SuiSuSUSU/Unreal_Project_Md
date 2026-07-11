@@ -1,7 +1,7 @@
 ---
 Status: ACTIVE
 Scope: Enemy Architecture
-Last Updated: 2026-07-06
+Last Updated: 2026-07-11
 Source of Truth: Yes
 ---
 
@@ -39,7 +39,10 @@ EnemyBase
 -> BP_Enemy_LittleDemon
 -> BP_Enemy_Fast
 -> BP_Enemy_Tank
--> future BP_Enemy_Ranged / Elite / Boss variants
+-> EnemyRangedDummy
+   -> BP_Enemy_RangedDummy / SkeletonMage presentation
+   -> EnemyStraightProjectile / BP_Enemy_StraightProjectile presentation
+-> future Elite / Boss variants
 
 EnemyStatsDataAsset
 -> enemy health, speed, attack, range, separation values
@@ -61,6 +64,7 @@ StageFlowManager
 | `BP_Enemy_LittleDemon` | `EnemyBase` + Little Demon assets | Stable MVP enemy. Uses the SingleNode / simple animation path for now. |
 | `BP_Enemy_Fast` | `EnemyBase` + DemonHeavy assets + dedicated AnimBP/Montage path | Fast pressure enemy. Uses weak/strong attack setup. |
 | `BP_Enemy_Tank` | `EnemyBase` + Butcher assets + dedicated AnimBP/Montage path | Slower durable enemy. Uses weak/strong attack setup. |
+| `AEnemyRangedDummy` | `EnemyBase` gameplay subclass | C++ build verified; SkeletonMage presentation and independent map test placement configured. Core approach, stop/facing, projectile, and player-damage PIE checks pass. Not registered in Start Stage encounters. |
 
 New enemy types should first be tested as `EnemyBase` Blueprint variants with different stats and assets. Add new C++ enemy subclasses only when shared `EnemyBase` settings and Blueprint configuration are no longer enough.
 
@@ -82,6 +86,7 @@ Current responsibilities:
 - weak/strong attack playback request;
 - attack-facing and post-attack turn support;
 - death handling and death event response.
+- a protected `UpdateCombatBehavior()` extension point whose default implementation preserves the existing chase/melee behavior.
 
 `EnemyBase` should not own:
 
@@ -116,6 +121,17 @@ Rules:
 - Keep monster-specific orientation, scale, and skeleton decisions in Blueprint or asset setup.
 - Use the original monster skeleton when possible.
 - Use IK Rig / IK Retargeter only when sharing animation across skeletons is actually needed.
+- Ranged telegraph, fire, and impact presentation should use Blueprint events/components; projectile gameplay must not depend on a specific mesh, Niagara, sound, or animation path.
+
+### Ranged Dummy Boundary
+
+`AEnemyRangedDummy` is the first intentional C++ behavior subclass because stop-and-fire behavior is materially different from `EnemyBase` melee pursuit.
+
+- `EnemyBase`: shared health, activation, spawn intro, hit reaction, Shock, and death lifecycle.
+- `EnemyRangedDummy`: approach range, stop/facing, telegraph timer, cooldown, and one-shot request.
+- `EnemyStraightProjectile`: straight non-homing movement, collision, and `HealthComponent` damage.
+- Blueprint: enemy mesh/AnimBP/attack presentation, projectile spawn-point transform, projectile Mesh/Niagara/Sound.
+- Encounter ownership remains in `RoomEncounterDataAsset`; this dummy is not part of Start Stage v0.1 yet.
 
 ## 7. EnemyStatsDataAsset Boundary
 

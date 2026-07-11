@@ -86,8 +86,10 @@ Run Start
 ## 6. Stage and Room Rules
 
 - A normal Stage contains multiple Rooms.
-- The current test baseline uses `Room 0~6`, roughly seven Rooms.
+- Earlier tests used `Room 0~6`, roughly seven Rooms.
 - The seven-Room count is not a final rule.
+- The current 3-month stabilization pass uses a smaller Start Stage baseline of 3 active Rooms.
+- The exact Start Stage 3-Room Encounter composition is `CANDIDATE v0.1` in `Docs/StartStageV01.md` until editor and PIE verification are complete.
 - Room count can change after playtesting based on Stage type, Run pacing, difficulty, or special rules.
 - A Stage Type must affect the Rooms or Encounters inside that Stage.
 - A Stage Node should never be treated as a single Room.
@@ -199,6 +201,7 @@ Current implementation:
 
 - `RoomCombatActor` handles Room entry, combat start, enemy spawning, alive enemy tracking, room clear, reward pickup, and next-room handoff.
 - Current Stage 1 MVP can chain multiple `RoomCombatActor` instances by `StageId` and `RoomOrder`.
+- Current Start Stage stabilization uses `StageFlowManager.ActiveStageRoomCount = 3`, so only the first three ordered Rooms count for Stage Clear.
 - Current last-room fallback shows Stage Clear / Restart as a temporary MVP behavior.
 - Current room-clear reward pickup is implemented for reward flow testing.
 - `RoomCombatActor` now emits `OnRoomProgressionReady` as the first handoff signal.

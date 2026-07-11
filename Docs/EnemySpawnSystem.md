@@ -86,7 +86,8 @@ Important details:
 - If `EncounterData` is assigned, Room spawn entries are read from the data asset first.
 - If `EncounterData` is not assigned, direct `RoomCombatActor` fields are used.
 - Initial enemies are intended to appear together at Room start.
-- Wave or sequential enemies can appear after a delay.
+- The first queued Wave enemy is scheduled when Room combat starts and can join after `SpawnDelay` while Initial enemies are still alive.
+- Pending or alive Wave enemies continue to block Room Clear.
 - Spawned enemies and placed enemies are both registered for clear checks when the clear condition requires it.
 - `RoomCombatActor` reports progression-ready; `StageFlowManager` decides the next manager-owned Room.
 
@@ -138,6 +139,13 @@ Guideline:
 - For throwaway tests, direct fields are fine.
 - For real Stage rooms that will survive longer, prefer `EncounterData`.
 - Do not remove these fields abruptly because existing placed Rooms and Blueprints may reference them.
+
+Current Start Stage stabilization exception:
+
+- The old `StageFlowManager` runtime 3-Room encounter override remains as a fallback but is disabled by default.
+- Start Stage `CANDIDATE v0.1` uses three authored `RoomEncounterDataAsset` assets instead of the runtime override.
+- Exact candidate entries and delays are documented in `Docs/StartStageV01.md`.
+- Do not treat this profile as implemented until the DataAssets and Room instances are verified in PIE.
 
 ## 8. Spawned Enemies
 
